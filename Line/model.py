@@ -5,32 +5,32 @@ class ThreeCarFollowingModel:
         """
         Initialize the three-car following model with the provided parameters.
         """
-        # 设置默认速度
+        # Set default speed
         if initial_velocities is None:
             initial_velocities = [20.0, 20.0, 20.0]
         elif len(initial_velocities) != 3:
             raise ValueError("initial_velocities must contain exactly 3 values")
     
-        # 存储初始速度
-        self.v0 = initial_velocities[0]  # 领头车初始速度
-        self.v1 = initial_velocities[1]  # 第一跟随车初始速度
-        self.v2 = initial_velocities[2]  # 第二跟随车初始速度
+        # Store initial speed
+        self.v0 = initial_velocities[0]  # Iniitial speed of L
+        self.v1 = initial_velocities[1]  # Initial spped of F1
+        self.v2 = initial_velocities[2]  # Initial spped of F2
     
-        # 设置默认位置
+        # Set default position
         if initial_positions is None:
             initial_positions = [200.0, 150.0, 100.0]
         elif len(initial_positions) != 3:
             raise ValueError("initial_positions must contain exactly 3 values")
     
-        # 存储初始位置
-        self.x0 = initial_positions[0]  # 领头车位置
-        self.y1 = initial_positions[1]  # 第一跟随车位置
-        self.y2 = initial_positions[2]  # 第二跟随车位置
+        # Store initial position
+        self.x0 = initial_positions[0]  # Position of L
+        self.y1 = initial_positions[1]  # Position of F1
+        self.y2 = initial_positions[2]  # Position of F2
 
-        # 存储距离阈值
+        # Storage distance threshold
         self.d = d
 
-        # 存储参数 - 确保这部分代码存在
+        # Store parameters -Make sure this part of the code exist
         if parameters is None:
             self.parameters = {
                 'a11': 2.0,  # F1 acceleration when both distances are large
@@ -43,31 +43,31 @@ class ThreeCarFollowingModel:
                 'c0': 1.0    # L acceleration when distance to F1 is small
             }
         else:
-            self.parameters = parameters  # 将传入的参数赋值给self.parameters
+            self.parameters = parameters  # Assigns the apassed argument to self.parameters
     
-        # 计算初始距离
-        self.x1 = self.x0 - self.y1  # L和F1之间的距离
-        self.x2 = self.y1 - self.y2  # F1和F2之间的距离
+        # Calculate initial distance
+        self.x1 = self.x0 - self.y1  # Distance between L and F1
+        self.x2 = self.y1 - self.y2  # Distance between F1 and F2
     
-        # 设置模拟时间参数
-        self.dt = 5       # 时间步长 [s]
-        self.t_max = 100.0   # 最大模拟时间 [s]
+        # Set simulation time parameters
+        self.dt = 5       # Set time steps [s]
+        self.t_max = 100.0   # Maximum simulation time [s]
         self.time = np.arange(0, self.t_max, self.dt)
 
-        # 存储模拟结果的容器
+        # Acontainer for storing simulation results
         self.history = {
             'time': self.time,
-            'x0': [self.x0],    # 领头车位置
-            'y1': [self.y1],    # 第一跟随车位置
-            'y2': [self.y2],    # 第二跟随车位置
-            'x1': [self.x1],    # L和F1之间的距离
-            'x2': [self.x2],    # F1和F2之间的距离
-            'v0': [self.v0],    # 领头车速度
-            'v1': [self.v1],    # 第一跟随车速度
-            'v2': [self.v2],    # 第二跟随车速度
-            'lambda1': [0],     # 布尔指示器x1 > d
-            'lambda2': [0],     # 布尔指示器x2 > d
-            'mode': ['00']      # 当前模式(λ1λ2)
+            'x0': [self.x0],    # Position of L
+            'y1': [self.y1],    # Position of F1
+            'y2': [self.y2],    # Position of F2
+            'x1': [self.x1],    # Distance between L and F1
+            'x2': [self.x2],    # Distance between F1 and F2
+            'v0': [self.v0],    # Speed of L
+            'v1': [self.v1],    # Speed of F1
+            'v2': [self.v2],    # Speed of F2
+            'lambda1': [0],     # Boolean indicator x1 > d
+            'lambda2': [0],     # Boolean indicator x2 > d
+            'mode': ['00']      # Curret Mode (λ1λ2)
         }
 
     def heaviside_step(self, x):

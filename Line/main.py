@@ -1,6 +1,7 @@
 from model import ThreeCarFollowingModel
 import visualization as vis
 import analysis as ana
+import os
 
 def main():
     """
@@ -27,6 +28,10 @@ def main():
     # distance threshold
     distance_threshold = 30.0  # m
     
+    # Create output directory
+    output_dir = "simulation_results"
+    os.makedirs(output_dir, exist_ok=True)
+    
     print("Running the three-car following model with custom initial conditions...")
     print(f"Lead car: position = {initial_positions[0]} m, velocity = {initial_velocities[0]} m/s")
     print(f"Following car 1: position = {initial_positions[1]} m, velocity = {initial_velocities[1]} m/s")
@@ -43,15 +48,44 @@ def main():
     
     model.run_simulation()
     
-    # plot result
-    vis.plot_results(model)
+    # Create a theme with the specified three colors
+    custom_colors = {
+        'plot_colors': {
+            'lead_car': '#FFD700',        # 金色 - 领头车
+            'following_car1': '#00B4D8',  # 湖蓝色 - 跟随车1
+            'following_car2': '#7FFFD4',  # 碧绿色 - 跟随车2
+            'threshold_line': '#FF6B6B',  # 红色 - 阈值线
+            'background': 'white',        # 白色背景
+            'grid': '#E0E0E0'             # 浅灰色网格
+        },
+        'animation_colors': {
+            'lead_car': '#FFD700',        # 金色 - 领头车
+            'following_car1': '#00B4D8',  # 湖蓝色 - 跟随车1
+            'following_car2': '#7FFFD4',  # 碧绿色 - 跟随车2
+            'car_edge': '#333333',        # 深灰色车辆边缘
+            'background': 'white',        # 白色背景
+            'text': '#333333'             # 深灰色文本
+        }
+    }
     
-    # analyse stability
+    # Create folders to store different styles of output
+    custom_dir = os.path.join(output_dir, "custom_colors")
+    os.makedirs(custom_dir, exist_ok=True)
+    
+    # Analyze the stability
     ana.analyze_stability(model)
     
-    # create animation
-    vis.animate_vehicles(model)
-
+    # Draw the result with a custom color and save
+    plots_path = os.path.join(custom_dir, "vehicle_plots.png")
+    print(f"Creating plots with custom colors and saving to {plots_path}...")
+    vis.plot_results(model, save_path=plots_path, colors=custom_colors['plot_colors'])
+    
+    # Create animations with custom colors and save them
+    gif_path = os.path.join(custom_dir, "vehicle_animation.gif")
+    print(f"Creating animation with custom colors and saving to {gif_path}...")
+    ani = vis.animate_vehicles(model, save_path=gif_path, fps=10, colors=custom_colors['animation_colors'])
+    
+    print("Simulation with custom colors completed successfully.")
 
 if __name__ == "__main__":
     main()

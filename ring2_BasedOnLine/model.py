@@ -2,10 +2,10 @@ import numpy as np
 
 class CircularCarFollowingModel:
     def __init__(self, 
-                 track_length=2000.0,  # 圆形轨道总长度
+                 track_length=2000.0,  # Total length of circular track
                  initial_velocities=None, 
                  initial_positions=None, 
-                 d=30.0,  # 期望车距
+                 d=30.0,  # Expected distance
                  parameters=None):
         """
         初始化三车跟随模型
@@ -17,106 +17,106 @@ class CircularCarFollowingModel:
         - d: 期望车距，可以是单一值或范围元组(min_d, max_d)
         - parameters: 模型额外参数
         """
-        # 轨道长度
+        # Track length
         self.track_length = track_length
         
-        # 默认速度设置
+        # Set default speed
         if initial_velocities is None:
             initial_velocities = [20.0, 20.0, 20.0]
         
-        # 默认位置设置
+        # Set default position
         if initial_positions is None:
             initial_positions = [1000.0, 970.0, 940.0]
         
-        # 默认参数
+        # Default parameter
         if parameters is None:
             parameters = {}
         
-        # 初始化车辆状态
-        self.x0 = float(initial_positions[0])  # 领头车位置
-        self.y1 = float(initial_positions[1])  # 第一跟随车位置
-        self.y2 = float(initial_positions[2])  # 第二跟随车位置
+        # Initialize the vehicle status
+        self.x0 = float(initial_positions[0])  # Position of L
+        self.y1 = float(initial_positions[1])  # Position od F1
+        self.y2 = float(initial_positions[2])  # Position od F2
         
-        self.v0 = float(initial_velocities[0])  # 领头车速度
-        self.v1 = float(initial_velocities[1])  # 第一跟随车速度
-        self.v2 = float(initial_velocities[2])  # 第二跟随车速度
+        self.v0 = float(initial_velocities[0])  # Speed of L
+        self.v1 = float(initial_velocities[1])  # Speed of F1
+        self.v2 = float(initial_velocities[2])  # Speed of F2
         
-        # 处理期望车距参数 - 检查d是否为元组
+        # Handle the expected distance parameter - Check if d is a tuple
         if isinstance(d, tuple) and len(d) == 2:
-            self.min_distance = float(d[0])  # 最小期望距离
-            self.max_distance = float(d[1])  # 最大期望距离
-            self.d = (self.min_distance + self.max_distance) / 2.0  # 使用平均值作为参考
+            self.min_distance = float(d[0])  # Minimum expected distance
+            self.max_distance = float(d[1])  # Maximum expected distance 
+            self.d = (self.min_distance + self.max_distance) / 2.0  # Use average values as a reference
         else:
-            # 使用单一值
+            # Use a single value
             self.d = float(d)
-            self.min_distance = self.d  # 最小允许距离
-            self.max_distance = self.d + 20.0  # 最大允许距离
+            self.min_distance = self.d  # Minimum allowable distance
+            self.max_distance = self.d + 20.0  # Maximum allowable distance
         
-        # 存储额外参数
+        # Store extra parameters
         self.np = parameters.get('np', {})
         
-        # 模拟参数 - 调整时间步长以平衡细节和稳定性
-        self.dt = 2.0       # 时间步长 [s] (改为2秒，原为5秒)
-        self.t_max = 300.0  # 最大模拟时间 [s]
+        # Simulation parameters - Adjust time steps to balance detail and stability
+        self.dt = 2.0       # time step [s] (change from 5s to 2s)
+        self.t_max = 300.0  # Maximum simulation time [s]
         self.time = np.arange(0, self.t_max, self.dt)
         
-        # 初始距离计算
-        self.x1 = self.circular_distance(self.x0, self.y1)  # L和F1之间的距离
-        self.x2 = self.circular_distance(self.y1, self.y2)  # F1和F2之间的距离
+        # Calculate initial distance
+        self.x1 = self.circular_distance(self.x0, self.y1)  # Distance between L and F1
+        self.x2 = self.circular_distance(self.y1, self.y2)  # Distance between F1 and F2
         
-        # 存储模拟结果的容器
+        # A container for  storing simulation results
         self.history = {
             'time': self.time,
-            'x0': [self.x0],    # 领头车位置
-            'y1': [self.y1],    # 第一跟随车位置
-            'y2': [self.y2],    # 第二跟随车位置
-            'x1': [self.x1],    # L和F1之间的距离
-            'x2': [self.x2],    # F1和F2之间的距离
-            'v0': [self.v0],    # 领头车速度
-            'v1': [self.v1],    # 第一跟随车速度
-            'v2': [self.v2],    # 第二跟随车速度
-            'mode': ['00']      # 系统模式
+            'x0': [self.x0],    # Position of L
+            'y1': [self.y1],    # Position of F1
+            'y2': [self.y2],    # Position of F2
+            'x1': [self.x1],    # Distance between L and F1
+            'x2': [self.x2],    # Distance between F1 and F2
+            'v0': [self.v0],    # Speed of L
+            'v1': [self.v1],    # Speed of F1
+            'v2': [self.v2],    # Speed of F2
+            'mode': ['00']      # System pattern
         }
     
     def circular_distance(self, pos1, pos2):
         """
-        计算圆形轨道上两点之间的最短距离
+        Calculate the shortest distance between two points on a circular orbit
         
         Args:
-        - pos1: 第一个点的位置
-        - pos2: 第二个点的位置
+        - pos1: position of first point
+        - pos2: position of second point
         
         Returns:
-        - 两点间的最短距离
+        - distance between two points
         """
         diff = abs(pos1 - pos2)
         return min(diff, self.track_length - diff)
     
     def heaviside_step(self, x):
         """
-        Heaviside阶跃函数: 如果x > 0返回1，否则返回0
+        Heaviside Step function Paraded: if x > 0 return 1，otherwise return 0
         
         Args:
-        - x: 输入值
+        - x: input value
         
         Returns:
-        - 阶跃函数结果
+        - Step function results
         """
         return 1 if x > 0 else 0
 
     def run_simulation(self):
         """
-        运行三车跟随模型模拟，增加随机性以模拟幻影拥堵，但保持合理的稳定性
-        增强了车辆在距离过大时的加速响应
+        Run a three-car follow model simulation, adding randomness to simulate phantom congestion but maintaining reasonable stability
+        The acceleration response of the vehicle is enhanced when the distance is too large
         
         Returns:
-        - 模拟历史记录
+        - Analog history
         """
-        # 导入numpy以支持随机性
+        # Import numpy to support randomness
         import numpy as np
         
-        # 模拟波浪周期的正弦波
-        wave_period = 60  # 60秒的周期
+        # Simulated wave period sine wave
+        wave_period = 60  # 60s cycle
         
         for t_idx in range(len(self.time) - 1):
             current_time = self.time[t_idx]

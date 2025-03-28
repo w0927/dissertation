@@ -4,38 +4,38 @@ from analysis import CircularTrackAnalyzer
 
 def main():
     """
-    主程序：演示三车跟随模型的完整工作流程
+    Main program: Demonstrates the complete workflow of the three-car follow model
     """
-    # 创建模型实例
-    # 不同参数可以测试模型在各种场景下的表现
+    # Ceratet a model instance 
+    # Different parameters can be used to test the model's performance in various scenarios
     model = CircularCarFollowingModel(
-        initial_velocities=[60.0, 70.0, 90.0],  # 初始速度
-        initial_positions=[800.0, 600.0, 220.0],  # 初始位置
-        d=(30.0, 50.0),  # 期望车距范围
-        parameters=None  # 使用默认参数
+        initial_velocities=[60.0, 70.0, 90.0],  # Initial speed
+        initial_positions=[800.0, 600.0, 220.0],  # Initial position
+        d=(30.0, 50.0),  # Expected distance range
+        parameters=None  # Use default parameters
     )
     
-    # 运行模拟
+    # Operation similation
     print("Running vehicle following simulation...")
     model.run_simulation()
     
-    # 创建可视化工具
+    # Create visual tools
     visualizer = CircularTrackVisualizer(model)
     
-    # 创建分析工具
+    # Create analysis tools
     analyzer = CircularTrackAnalyzer(model)
     
-    # 执行分析
+    # Execution analysis
     print("\nConduct system stability analysis...")
     stability_analysis = analyzer.analyze_stability()
     
-    # 可视化结果并保存
+    # Store the visual results
     print("\nPlot the simulation results...")
-    visualizer.plot_results(save=True)  # 添加save=True参数
+    visualizer.plot_results(save=True)  # Add parameters: save=True
     
-    # 创建车辆动画并保存
+    # Create and save the animations
     print("\nGenerate vehicle motion animation...")
-    visualizer.animate_vehicles(save=True)  # 添加save=True参数
+    visualizer.animate_vehicles(save=True)  # Add parameters: save=True
 
 if __name__ == "__main__":
     main()

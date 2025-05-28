@@ -187,11 +187,18 @@ def animate_vehicles(model, save_path=None, fps=10, colors=None):
         f1_car.set_xy((model.history['y1'][i], 0))
         f2_car.set_xy((model.history['y2'][i], 0))
         time_text.set_text(f'Time: {model.history["time"][i]:.1f} s')
-        mode_text.set_text(f'Mode (λ1λ2): {model.history["mode"][i]}')
+        # 安全地获取模式，防止索引越界
+        if i < len(model.history["mode"]):
+            current_mode = model.history["mode"][i]
+        else:
+            current_mode = model.history["mode"][-1]  # 使用最后一个模式
+        mode_text.set_text(f'Mode (λ1λ2): {current_mode}')
         return lead_car, f1_car, f2_car, time_text, mode_text
     
-    ani = FuncAnimation(fig, animate, frames=len(model.history['time']), 
-                      init_func=init, interval=100, blit=True)
+    # 使用最小长度作为帧数，防止索引越界
+    max_frames = min(len(model.history['time']), len(model.history['mode']))
+    ani = FuncAnimation(fig, animate, frames=max_frames, 
+                        init_func=init, interval=100, blit=True)
     
     plt.tight_layout()
     
